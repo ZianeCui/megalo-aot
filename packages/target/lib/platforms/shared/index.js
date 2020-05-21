@@ -108,6 +108,65 @@ module.exports = function( {
         .map( c => c.name )
     )
 
+
+    // 代码不做优化，直接导入需要的内容
+    components.forEach((component) => {
+      const { imports, slots, children } = component
+      // 收集 import 依赖
+      if (Object.keys(imports).length) {
+          component.importNames = Object.keys(imports).map(key => imports[key].name) || []
+      }
+      // 收集 slot 依赖
+      if (slots.length) {
+          component.slotsDepends = []
+          component.slotsBody = ''
+          slots.forEach(item => {
+              component.slotsDepends = component.slotsDepends.concat(item.dependencies)
+              component.slotsBody += item.body
+          })
+      }
+
+      component.dependencies = [].concat(component.importNames || [], component.slotsDepends || [])
+      // 导入 children内容
+    })
+
+    function getDepInstances (dependencies) {
+      const allDependentInstances = dependencies.map(item => {
+          const matchComp = components.filter(comp => comp.name == item)
+          return matchComp[0]
+      })
+
+      return allDependentInstances
+    }
+
+    function getAllDepInstances (component) {
+      let allDependentInstances = getDepInstances(component.dependencies)
+      if (!allDependentInstances.length) {
+          return allDependentInstances
+      }
+
+      allDependentInstances.forEach(dep => {
+          allDependentInstances = allDependentInstances.concat(getAllDepInstances(dep))
+      })
+
+      return allDependentInstances
+    }
+
+    components.forEach((component) => {
+      component.instanceDependencies = getAllDepInstances(component)
+    })
+
+    // 去重
+    components.forEach((component) => {
+      component.instanceDependencies = [...new Set(component.instanceDependencies)]
+    })
+
+    // imports slots body 组成
+    components.forEach((component) => {
+      component.instanceDependencies.forEach(item => component.body = item.body + component.body)
+      component.slots.forEach(item => component.body = item.body + component.body)
+    })
+
     const mainSlots = new Set()
     const subpackageSlots = {}
 

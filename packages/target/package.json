@@ -1,6 +1,6 @@
 {
-  "name": "@megalo/target",
-  "version": "0.7.3",
+  "name": "megalo-target-alipay",
+  "version": "0.0.1",
   "description": "",
   "main": "lib/index.js",
   "publishConfig": {
@@ -16,7 +16,7 @@
   "author": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kaola-fed/megalo-aot/tree/master/packages/target"
+    "url": "https://github.com/ZianeCui/megalo-aot"
   },
   "license": "MIT",
   "dependencies": {
